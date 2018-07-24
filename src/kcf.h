@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <memory>
 #include "fhog.hpp"
 
 #ifdef CUFFT
@@ -16,6 +17,7 @@
 
 #include "cnfeat.hpp"
 #include "fft.h"
+#include "scale_vars.hpp"
 
 struct BBox_c
 {
@@ -43,17 +45,9 @@ struct BBox_c
 
     inline cv::Rect get_rect()
     {
-        return cv::Rect(cx-w/2., cy-h/2., w, h);
+        return cv::Rect(int(cx-w/2.), int(cy-h/2.), int(w), int(h));
     }
 
-};
-
-struct Scale_var
-{
-    float *xf_sqr_norm = nullptr, *yf_sqr_norm = nullptr;
-#ifdef CUFFT
-    float *xf_sqr_norm_d = nullptr, *yf_sqr_norm_d = nullptr, *gauss_corr_res = nullptr;
-#endif
 };
 
 class KCF_Tracker
@@ -76,7 +70,7 @@ public:
 #else
     bool m_use_big_batch {false};
 #endif
-#ifdef BIG_BATCH
+#ifdef CUFFT
     bool m_use_cuda {true};
 #else
     bool m_use_cuda {false};
@@ -115,6 +109,7 @@ private:
     const double p_downscale_factor = 0.5;
     double p_scale_factor_x = 1;
     double p_scale_factor_y = 1;
+    double p_floating_error = 0.0001;
 
     double p_padding = 1.5;
     double p_output_sigma_factor = 0.1;
@@ -134,7 +129,7 @@ private:
     int p_num_of_feats;
     int p_roi_height, p_roi_width;
 
-    std::vector<Scale_var> scale_vars;
+    std::list<std::unique_ptr<Scale_vars>> p_scale_vars;
 
     //model
     ComplexMat p_yf;
@@ -143,14 +138,15 @@ private:
     ComplexMat p_model_alphaf_den;
     ComplexMat p_model_xf;
     //helping functions
+    void scale_track(Scale_vars & vars, cv::Mat & input_rgb, cv::Mat & input_gray, double scale);
     cv::Mat get_subwindow(const cv::Mat & input, int cx, int cy, int size_x, int size_y);
     cv::Mat gaussian_shaped_labels(double sigma, int dim1, int dim2);
-    ComplexMat gaussian_correlation(struct Scale_var &vars, const ComplexMat & xf, const ComplexMat & yf, double sigma, bool auto_correlation = false);
+    void gaussian_correlation(struct Scale_vars &vars, const ComplexMat & xf, const ComplexMat & yf, double sigma, bool auto_correlation = false);
     cv::Mat circshift(const cv::Mat & patch, int x_rot, int y_rot);
     cv::Mat cosine_window_function(int dim1, int dim2);
-    std::vector<cv::Mat> get_features(cv::Mat & input_rgb, cv::Mat & input_gray, int cx, int cy, int size_x, int size_y, double scale = 1.);
+    void get_features(cv::Mat & input_rgb, cv::Mat & input_gray, int cx, int cy, int size_x, int size_y, Scale_vars & vars, double scale = 1.);
     cv::Point2f sub_pixel_peak(cv::Point & max_loc, cv::Mat & response);
-    double sub_grid_scale(std::vector<double> & responses, int index = -1);
+    double sub_grid_scale(int index = -1);
 
 };
 

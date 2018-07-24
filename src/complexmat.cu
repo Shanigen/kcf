@@ -29,12 +29,12 @@ __global__ void sqr_norm_kernel(int n, float* out, float* data, float rows, floa
 
 void ComplexMat::sqr_norm(float *result) const
 {
-    CudaSafeCall(cudaMemset(result, 0, n_scales*sizeof(float)));
+    CudaSafeCall(cudaMemsetAsync(result, 0, n_scales*sizeof(float), this->stream));
 
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
     
-    sqr_norm_kernel<<<numBlocks, threadsPerBlock, rows*cols*sizeof(float)>>>(n_channels/n_scales, result, p_data, rows, cols);
+    sqr_norm_kernel<<<numBlocks, threadsPerBlock, rows*cols*sizeof(float), this->stream>>>(n_channels/n_scales, result, this->p_data, rows, cols);
     CudaCheckError();
         
     return;
@@ -51,11 +51,11 @@ __global__ void sqr_mag_kernel(float* data, float* result)
 
 ComplexMat ComplexMat::sqr_mag() const
 {
-    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales);
+    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales, this->stream);
     
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
-    sqr_mag_kernel<<<numBlocks, threadsPerBlock>>>(this->p_data, result.p_data);
+    sqr_mag_kernel<<<numBlocks, threadsPerBlock, 0, this->stream>>>(this->p_data, result.p_data);
     CudaCheckError();
     
     return result;
@@ -72,11 +72,11 @@ __global__ void conj_kernel(float* data, float* result)
 
 ComplexMat ComplexMat::conj() const
 {
-    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales);
+    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales, this->stream);
     
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
-    conj_kernel<<<numBlocks, threadsPerBlock>>>(this->p_data, result.p_data);
+    conj_kernel<<<numBlocks, threadsPerBlock, 0, this->stream>>>(this->p_data, result.p_data);
     CudaCheckError();
 
     return result;
@@ -85,7 +85,7 @@ ComplexMat ComplexMat::conj() const
 ComplexMat ComplexMat::sum_over_channels() const
 {
 //     assert(p_data.size() > 1);
-    ComplexMat result(this->rows, this->cols, 1);
+    ComplexMat result(this->rows, this->cols, 1, this->stream);
     return result;
 }
 
@@ -108,11 +108,11 @@ ComplexMat ComplexMat::operator*(const ComplexMat & rhs) const
 {
     assert(rhs.n_channels == n_channels && rhs.cols == cols && rhs.rows == rows);
     
-    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales);
+    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales, this->stream);
 
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
-    same_num_channels_mul_kernel<<<numBlocks, threadsPerBlock>>>(this->p_data, rhs.p_data, result.p_data);
+    same_num_channels_mul_kernel<<<numBlocks, threadsPerBlock, 0, this->stream>>>(this->p_data, rhs.p_data, result.p_data);
     CudaCheckError();
 
     return result;
@@ -133,11 +133,11 @@ ComplexMat ComplexMat::operator/(const ComplexMat & rhs) const
 {
     assert(rhs.n_channels == n_channels && rhs.cols == cols && rhs.rows == rows);
 
-    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales);
+    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales, this->stream);
     
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
-    same_num_channels_div_kernel<<<numBlocks, threadsPerBlock>>>(this->p_data, rhs.p_data, result.p_data);
+    same_num_channels_div_kernel<<<numBlocks, threadsPerBlock, 0, this->stream>>>(this->p_data, rhs.p_data, result.p_data);
     CudaCheckError();
 
     return result;
@@ -156,11 +156,11 @@ ComplexMat ComplexMat::operator+(const ComplexMat & rhs) const
 {
     assert(rhs.n_channels == n_channels && rhs.cols == cols && rhs.rows == rows);
 
-    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales);
+    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales, this->stream);
     
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
-    same_num_channels_add_kernel<<<numBlocks, threadsPerBlock>>>(this->p_data, rhs.p_data, result.p_data);
+    same_num_channels_add_kernel<<<numBlocks, threadsPerBlock, 0, this->stream>>>(this->p_data, rhs.p_data, result.p_data);
     CudaCheckError();
     
     return result;
@@ -177,11 +177,11 @@ __global__ void constant_mul_kernel(float* data_l, float constant, float* result
 
 ComplexMat ComplexMat::operator*(const float & rhs) const
 {
-    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales);
+    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales, this->stream);
     
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
-    constant_mul_kernel<<<numBlocks, threadsPerBlock>>>(this->p_data, rhs, result.p_data);
+    constant_mul_kernel<<<numBlocks, threadsPerBlock, 0, this->stream>>>(this->p_data, rhs, result.p_data);
     CudaCheckError();
 
     return result;
@@ -198,11 +198,11 @@ __global__ void constant_add_kernel(float* data_l, float constant, float* result
 
 ComplexMat ComplexMat::operator+(const float & rhs) const
 {
-    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales);
+    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales, this->stream);
     
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
-    constant_add_kernel<<<numBlocks, threadsPerBlock>>>(this->p_data, rhs, result.p_data);
+    constant_add_kernel<<<numBlocks, threadsPerBlock, 0, this->stream>>>(this->p_data, rhs, result.p_data);
     CudaCheckError();
 
     return result;
@@ -223,11 +223,11 @@ ComplexMat ComplexMat::mul(const ComplexMat & rhs) const
 {
     assert(rhs.n_channels == 1 && rhs.cols == cols && rhs.rows == rows);
 
-    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales);
+    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales, this->stream);
     
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
-    one_channel_mul_kernel<<<numBlocks, threadsPerBlock>>>(this->p_data, rhs.p_data, result.p_data);
+    one_channel_mul_kernel<<<numBlocks, threadsPerBlock, 0, this->stream>>>(this->p_data, rhs.p_data, result.p_data);
     CudaCheckError();
     
     return result;
@@ -248,11 +248,11 @@ ComplexMat ComplexMat::mul2(const ComplexMat & rhs) const
 {
     assert(rhs.n_channels == n_channels/n_scales && rhs.cols == cols && rhs.rows == rows);
 
-    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales);
+    ComplexMat result(this->rows, this->cols, this->channels(), this->n_scales, this->stream);
     
     dim3 threadsPerBlock(rows, cols);
     dim3 numBlocks(n_channels/n_scales, n_scales);
-    scales_channel_mul_kernel<<<numBlocks, threadsPerBlock>>>(this->p_data, rhs.p_data, result.p_data);
+    scales_channel_mul_kernel<<<numBlocks, threadsPerBlock, 0, this->stream>>>(this->p_data, rhs.p_data, result.p_data);
     CudaCheckError();
     
     return result;
@@ -264,6 +264,7 @@ void ComplexMat::operator=(ComplexMat & rhs)
     rows = rhs.rows;
     n_channels = rhs.n_channels;
     n_scales = rhs.n_scales;
+    stream = rhs.stream;
     foreign_data = true;
     
     p_data = rhs.p_data;
@@ -275,6 +276,7 @@ void ComplexMat::operator=(ComplexMat && rhs)
     rows = rhs.rows;
     n_channels = rhs.n_channels;
     n_scales = rhs.n_scales;
+    stream = rhs.stream;
     
     p_data = rhs.p_data;
     

@@ -21,6 +21,10 @@ public:
         p_data.resize(n_channels*cols*rows);
     }
 
+    ComplexMat_(int _rows, int _cols, int _n_channels, int _n_scales) : cols(_cols), rows(_rows), n_channels(_n_channels), n_scales(_n_scales)
+    {
+        p_data.resize(n_channels*cols*rows);
+    }
 
     //assuming that mat has 2 channels (real, img)
     ComplexMat_(const cv::Mat & mat) : cols(mat.cols), rows(mat.rows), n_channels(1)
@@ -288,6 +292,7 @@ public:
 
     ComplexMat();
     ComplexMat(int _rows, int _cols, int _n_channels);
+    ComplexMat(int _rows, int _cols, int _n_channels, int _n_scales);
     ComplexMat(const cv::Mat & mat);
 
     void create(int _rows, int _cols, int _n_channels);
