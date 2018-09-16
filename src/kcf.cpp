@@ -329,9 +329,17 @@ void KCF_Tracker::findMaxReponse(uint &max_idx, cv::Point2f &new_location) const
 #else
     // FIXME: Iterate correctly in big batch mode - perhaps have only one element in the list
     for (uint j = 0; j < p_scales.size(); ++j) {
+<<<<<<< HEAD
         if (d.threadctxs[0].max[j].response > max) {
             max = d.threadctxs[0].max[j].response;
             max_idx = j;
+=======
+        if (d.threadctxs[0].max_responses[j] > max_response) {
+            max_response = d.threadctxs[0].max_responses[j];
+            max_response_pt = &d.threadctxs[0].max_locs[j];
+            max_response_map = &d.threadctxs[0].response_maps[j];
+            max = &d.threadctxs[0];
+>>>>>>> Move thread context to class-private data structure
         }
     }
 #endif
