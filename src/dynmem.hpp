@@ -68,7 +68,6 @@ template <typename T> class DynMem_ {
 
 typedef DynMem_<float> DynMem;
 
-
 class MatDynMem : public DynMem, public cv::Mat {
   public:
     MatDynMem(cv::Size size, int type)
