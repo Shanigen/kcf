@@ -1,7 +1,25 @@
 #!/usr/bin/bash
 
+USE_FPS=0
+
 mkdir -p plot-data
 cd plot-data
+
+while getopts ":f" opt
+do
+    case $opt in
+        f)
+            USE_FPS=1
+            break
+            ;;
+        \?)
+            echo "Invalid option -$OPTARG" >&2
+            exit 1
+            ;;
+    esac
+done
+
+shift $((OPTIND-1))
 
 for log in "$@"
 do
@@ -36,6 +54,9 @@ do
         fi
         time=${line%,*,*}
         time=${time//[!.0-9]/}
+        if [ "$USE_FPS" -eq "1" ]; then
+            time=$(bc <<< "scale=3;(1/$time)*1000;")
+        fi
         echo "$time" >> "$data_file"
     done < "../../../${log}"
 
@@ -55,7 +76,12 @@ do
         N = words(header)
 
         set title "${directory^}-${subdirectory}"
-        set ylabel "Time [ms]"
+
+        if ($USE_FPS == 1) {
+           set ylabel "FPS"
+        } else {
+          set ylabel "Time [ms]"
+        }
         set xtics rotate
         set xtics ('' 1)
         set for [i=1:N] xtics add (word(header, i) i)
