@@ -96,7 +96,6 @@ class MatDynMem : public DynMem, public cv::Mat {
     void operator=(const cv::MatExpr &expr) {
         static_cast<cv::Mat>(*this) = expr;
     }
-
   private:
     static int volume(int ndims, const int *sizes)
     {
