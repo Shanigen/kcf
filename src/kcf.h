@@ -152,7 +152,7 @@ private:
     cv::Mat gaussian_shaped_labels(double sigma, int dim1, int dim2);
     std::unique_ptr<GaussianCorrelation> gaussian_correlation;
     cv::Mat circshift(const cv::Mat &patch, int x_rot, int y_rot);
-    cv::Mat cosine_window_function(int dim1, int dim2);
+    MatDynMem cosine_window_function(int dim1, int dim2);
     void get_features(MatFeats &result, cv::Mat &input_rgb, cv::Mat &input_gray, int cx, int cy, int size_x, int size_y, double scale) const;
     cv::Point2f sub_pixel_peak(cv::Point &max_loc, cv::Mat &response) const;
     double sub_grid_scale(uint index);
