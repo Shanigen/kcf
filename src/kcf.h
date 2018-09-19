@@ -139,8 +139,6 @@ private:
         void operator()(const KCF_Tracker &kcf, ComplexMat &result, const ComplexMat &xf, const ComplexMat &yf, double sigma, bool auto_correlation = false);
 
       private:
-        const int ifft_size[3];
-
         DynMem xf_sqr_norm;
         DynMem yf_sqr_norm{1};
         ComplexMat xyf;
