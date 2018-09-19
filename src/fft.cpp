@@ -22,6 +22,7 @@ void Fft::init(unsigned width, unsigned height, unsigned num_of_feats, unsigned 
 void Fft::set_window(const MatDynMem &window)
 {
     assert(window.dims == 2);
+<<<<<<< HEAD
     assert(window.size().width == int(m_width));
     assert(window.size().height == int(m_height));
     (void)window;
@@ -34,10 +35,23 @@ void Fft::forward(const MatScales &real_input, ComplexMat &complex_result)
     assert(real_input.size[1] == int(m_height));
     assert(real_input.size[2] == int(m_width));
 
+=======
+    assert(window.size().width == m_width);
+    assert(window.size().height == m_height);
+    (void)window;
+}
+
+void Fft::forward(const MatDynMem &real_input, ComplexMat &complex_result)
+{
+    assert(real_input.dims == 2);
+    assert(real_input.size().width == m_width);
+    assert(real_input.size().height == m_height);
+>>>>>>> fft: Implement assertions in the base class
     (void)real_input;
     (void)complex_result;
 }
 
+<<<<<<< HEAD
 void Fft::forward_window(MatFeats &patch_feats, ComplexMat &complex_result, MatFeats &tmp)
 {
         assert(patch_feats.dims == 3);
@@ -57,12 +71,27 @@ void Fft::forward_window(MatScaleFeats &patch_feats, ComplexMat &complex_result,
         assert(patch_feats.size[1] == int(m_num_of_feats));
         assert(patch_feats.size[2] == int(m_height));
         assert(patch_feats.size[3] == int(m_width));
+=======
+void Fft::forward_window(MatDynMem &patch_feats, ComplexMat &complex_result, MatDynMem &tmp)
+{
+        assert(patch_feats.dims == 3);
+#ifndef BIG_BATCH
+        assert(patch_feats.size[0] == m_num_of_feats);
+#else
+        assert(patch_feats.size[0] == m_num_of_feats * m_num_of_scales);
+#endif
+        assert(patch_feats.size[1] == m_height);
+        assert(patch_feats.size[2] == m_width);
+>>>>>>> fft: Implement assertions in the base class
 
         assert(tmp.dims == patch_feats.dims);
         assert(tmp.size[0] == patch_feats.size[0]);
         assert(tmp.size[1] == patch_feats.size[1]);
         assert(tmp.size[2] == patch_feats.size[2]);
+<<<<<<< HEAD
         assert(tmp.size[3] == patch_feats.size[3]);
+=======
+>>>>>>> fft: Implement assertions in the base class
 
         (void)patch_feats;
         (void)complex_result;
@@ -71,11 +100,22 @@ void Fft::forward_window(MatScaleFeats &patch_feats, ComplexMat &complex_result,
 
 void Fft::inverse(ComplexMat &complex_input, MatDynMem &real_result)
 {
+<<<<<<< HEAD
     assert(real_result.dims == 4);
     assert(real_result.size[0] == IF_BIG_BATCH(int(m_num_of_scales), 1));
     assert(real_result.size[1] == int(m_num_of_feats));
     assert(real_result.size[2] == int(m_height));
     assert(real_result.size[3] == int(m_width));
+=======
+    assert(real_result.dims == 3);
+#ifndef BIG_BATCH
+    assert(real_result.size[0] == m_num_of_feats);
+#else
+    assert(real_result.size[0] == m_num_of_feats * m_num_of_scales);
+#endif
+    assert(real_result.size[1] == m_height);
+    assert(real_result.size[2] == m_width);
+>>>>>>> fft: Implement assertions in the base class
 
     (void)complex_input;
     (void)real_result;
