@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
 USE_FPS=0
+SORT=0
 
-while getopts ":f" opt
+while getopts "fs" opt
 do
     case $opt in
         f)
             USE_FPS=1
-            break
+            ;;
+        s)
+            SORT=1
             ;;
         \?)
             echo "Invalid option -$OPTARG" >&2
@@ -28,9 +31,14 @@ do
 
     data_file=${log%.log}.dat
 
-    (echo ${tracker_version}-${arguments}-${dataset}; grep -o '[0-9.]*ms' $log ) > $data_file
-
+    (echo ${tracker_version}-${arguments}-${dataset}; grep -e '->' $log | grep -o '[0-9.]*ms' ) > $data_file
 done
+
+if (($SORT == 1))
+then
+    getavg() { grep Average $1 | grep -o '[0-9.]*ms'; }
+    set -- $(for i in $@; do echo $i $(getavg $i); done | sort -n -k2 | cut -f1 -d' ')
+fi
 
 paste ${@//.log/.dat} > all
 
