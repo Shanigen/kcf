@@ -530,9 +530,9 @@ void KCF_Tracker::get_features(MatFeats &result, cv::Mat &input_rgb, cv::Mat &in
         hog_feat[i].copyTo(result.plane(i));
 }
 
-cv::Mat KCF_Tracker::gaussian_shaped_labels(double sigma, int dim1, int dim2)
+MatDynMem KCF_Tracker::gaussian_shaped_labels(double sigma, int dim1, int dim2)
 {
-    cv::Mat labels(dim2, dim1, CV_32FC1);
+    MatDynMem labels(dim2, dim1, CV_32FC1);
     int range_y[2] = {-dim2 / 2, dim2 - dim2 / 2};
     int range_x[2] = {-dim1 / 2, dim1 - dim1 / 2};
 
@@ -554,9 +554,9 @@ cv::Mat KCF_Tracker::gaussian_shaped_labels(double sigma, int dim1, int dim2)
     return rot_labels;
 }
 
-cv::Mat KCF_Tracker::circshift(const cv::Mat &patch, int x_rot, int y_rot)
+MatDynMem KCF_Tracker::circshift(const cv::Mat &patch, int x_rot, int y_rot)
 {
-    cv::Mat rot_patch(patch.size(), CV_32FC1);
+    MatDynMem rot_patch(patch.size(), CV_32FC1);
     cv::Mat tmp_x_rot(patch.size(), CV_32FC1);
 
     // circular rotate x-axis
@@ -619,7 +619,7 @@ cv::Mat KCF_Tracker::circshift(const cv::Mat &patch, int x_rot, int y_rot)
 }
 
 // hann window actually (Power-of-cosine windows)
-MatDynMem KCF_Tracker::cosine_window_function(int dim1, int dim2)
+cv::Mat KCF_Tracker::cosine_window_function(int dim1, int dim2)
 {
     cv::Mat m1(1, dim1, CV_32FC1), m2(dim2, 1, CV_32FC1);
     double N_inv = 1. / (static_cast<double>(dim1) - 1.);
@@ -628,7 +628,7 @@ MatDynMem KCF_Tracker::cosine_window_function(int dim1, int dim2)
     N_inv = 1. / (static_cast<double>(dim2) - 1.);
     for (int i = 0; i < dim2; ++i)
         m2.at<float>(i) = float(0.5 * (1. - std::cos(2. * CV_PI * static_cast<double>(i) * N_inv)));
-    MatDynMem ret = m2 * m1;
+    cv::Mat ret = m2 * m1;
     return ret;
 }
 
