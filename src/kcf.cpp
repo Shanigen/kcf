@@ -619,7 +619,7 @@ MatDynMem KCF_Tracker::circshift(const cv::Mat &patch, int x_rot, int y_rot)
 }
 
 // hann window actually (Power-of-cosine windows)
-cv::Mat KCF_Tracker::cosine_window_function(int dim1, int dim2)
+MatDynMem KCF_Tracker::cosine_window_function(int dim1, int dim2)
 {
     cv::Mat m1(1, dim1, CV_32FC1), m2(dim2, 1, CV_32FC1);
     double N_inv = 1. / (static_cast<double>(dim1) - 1.);
