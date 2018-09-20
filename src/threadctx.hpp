@@ -58,6 +58,11 @@ public:
         double response;
     };
 
+    KCF_Tracker::GaussianCorrelation* get_gaussian_correlation()
+    {
+        return &gaussian_correlation;
+    }
+
     struct Max {
         cv::Point2i loc;
         double response;
