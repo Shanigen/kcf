@@ -244,7 +244,6 @@ void KCF_Tracker::init(cv::Mat &img, const cv::Rect &bbox, int fit_size_x, int f
 
     fft.init(p_roi.width, p_roi.height, p_num_of_feats, p_num_scales);
     fft.set_window(MatDynMem(cosine_window_function(p_roi.width, p_roi.height)));
-
     // window weights, i.e. labels
     MatScales gsl(1, p_roi);
     gaussian_shaped_labels(p_output_sigma, p_roi.width, p_roi.height).copyTo(gsl.plane(0));
