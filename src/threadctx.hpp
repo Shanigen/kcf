@@ -39,7 +39,6 @@ private:
     uint num_of_scales;
     cv::Size freq_size = Fft::freq_size(roi);
 
-
     KCF_Tracker::GaussianCorrelation gaussian_correlation{num_of_scales, num_features, roi};
 
     MatDynMem ifft2_res{roi, CV_32FC(int(num_features))};
