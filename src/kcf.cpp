@@ -734,7 +734,7 @@ void KCF_Tracker::GaussianCorrelation::operator()(const KCF_Tracker &kcf, Comple
 
     float numel_xf_inv = 1.f / (xf.cols * xf.rows * (xf.channels() / xf.n_scales));
     for (uint i = 0; i < xf.n_scales; ++i) {
-        cv::Mat k_roi(k, cv::Rect(0, i * scales[0].rows, scales[0].cols, scales[0].rows));
+        cv::Mat k_roi = k.plane(i);
         cv::exp(-1. / (sigma * sigma) * cv::max((xf_sqr_norm[i] + yf_sqr_norm[0] - 2 * scales[i]) * numel_xf_inv, 0),
                 k_roi);
         DEBUG_PRINTM(k_roi);
