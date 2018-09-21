@@ -87,7 +87,6 @@ void KCF_Tracker::train(cv::Mat input_gray, cv::Mat input_rgb, double interp_fac
         const uint num_scales = BIG_BATCH_MODE ? p_num_scales : 1;
         cv::Size sz(Fft::freq_size(p_roi));
         ComplexMat kf(sz.height, sz.width, num_scales);
-        //TODO: This is clearly wrong and needs to be chek
         (*gaussian_correlation)(*this, kf, p_model_xf, p_model_xf, p_kernel_sigma, true);
         DEBUG_PRINTM(kf);
         p_model_alphaf_num = p_yf * kf;
@@ -533,7 +532,7 @@ void KCF_Tracker::get_features(MatFeats &result, cv::Mat &input_rgb, cv::Mat &in
 
 cv::Mat KCF_Tracker::gaussian_shaped_labels(double sigma, int dim1, int dim2)
 {
-    MatDynMem labels(dim2, dim1, CV_32FC1);
+    cv::Mat labels(dim2, dim1, CV_32FC1);
     int range_y[2] = {-dim2 / 2, dim2 - dim2 / 2};
     int range_x[2] = {-dim1 / 2, dim1 - dim1 / 2};
 
@@ -557,7 +556,7 @@ cv::Mat KCF_Tracker::gaussian_shaped_labels(double sigma, int dim1, int dim2)
 
 cv::Mat KCF_Tracker::circshift(const cv::Mat &patch, int x_rot, int y_rot)
 {
-    MatDynMem rot_patch(patch.size(), CV_32FC1);
+    cv::Mat rot_patch(patch.size(), CV_32FC1);
     cv::Mat tmp_x_rot(patch.size(), CV_32FC1);
 
     // circular rotate x-axis
