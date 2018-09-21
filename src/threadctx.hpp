@@ -58,11 +58,6 @@ public:
         double response;
     };
 
-    KCF_Tracker::GaussianCorrelation* get_gaussian_correlation()
-    {
-        return &gaussian_correlation;
-    }
-
 #ifdef BIG_BATCH
     std::vector<Max> max = std::vector<Max>(num_of_scales);
 #else

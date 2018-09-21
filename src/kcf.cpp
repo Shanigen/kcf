@@ -88,7 +88,7 @@ void KCF_Tracker::train(cv::Mat input_gray, cv::Mat input_rgb, double interp_fac
         cv::Size sz(Fft::freq_size(p_roi));
         ComplexMat kf(sz.height, sz.width, num_scales);
         //TODO: This is clearly wrong and needs to be chek
-        (*d.threadctxs[0].get_gaussian_correlation())(*this, kf, p_model_xf, p_model_xf, p_kernel_sigma, true);
+        (*gaussian_correlation)(*this, kf, p_model_xf, p_model_xf, p_kernel_sigma, true);
         DEBUG_PRINTM(kf);
         p_model_alphaf_num = p_yf * kf;
         DEBUG_PRINTM(p_model_alphaf_num);
@@ -245,6 +245,7 @@ void KCF_Tracker::init(cv::Mat &img, const cv::Rect &bbox, int fit_size_x, int f
 
     fft.init(p_roi.width, p_roi.height, p_num_of_feats, p_num_scales);
     fft.set_window(MatDynMem(cosine_window_function(p_roi.width, p_roi.height)));
+
     // window weights, i.e. labels
     MatScales gsl(1, p_roi);
     gaussian_shaped_labels(p_output_sigma, p_roi.width, p_roi.height).copyTo(gsl.plane(0));
@@ -530,7 +531,7 @@ void KCF_Tracker::get_features(MatFeats &result, cv::Mat &input_rgb, cv::Mat &in
         hog_feat[i].copyTo(result.plane(i));
 }
 
-MatDynMem KCF_Tracker::gaussian_shaped_labels(double sigma, int dim1, int dim2)
+cv::Mat KCF_Tracker::gaussian_shaped_labels(double sigma, int dim1, int dim2)
 {
     MatDynMem labels(dim2, dim1, CV_32FC1);
     int range_y[2] = {-dim2 / 2, dim2 - dim2 / 2};
@@ -554,7 +555,7 @@ MatDynMem KCF_Tracker::gaussian_shaped_labels(double sigma, int dim1, int dim2)
     return rot_labels;
 }
 
-MatDynMem KCF_Tracker::circshift(const cv::Mat &patch, int x_rot, int y_rot)
+cv::Mat KCF_Tracker::circshift(const cv::Mat &patch, int x_rot, int y_rot)
 {
     MatDynMem rot_patch(patch.size(), CV_32FC1);
     cv::Mat tmp_x_rot(patch.size(), CV_32FC1);
@@ -619,7 +620,7 @@ MatDynMem KCF_Tracker::circshift(const cv::Mat &patch, int x_rot, int y_rot)
 }
 
 // hann window actually (Power-of-cosine windows)
-MatDynMem KCF_Tracker::cosine_window_function(int dim1, int dim2)
+cv::Mat KCF_Tracker::cosine_window_function(int dim1, int dim2)
 {
     cv::Mat m1(1, dim1, CV_32FC1), m2(dim2, 1, CV_32FC1);
     double N_inv = 1. / (static_cast<double>(dim1) - 1.);
