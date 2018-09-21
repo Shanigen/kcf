@@ -63,11 +63,6 @@ public:
         return &gaussian_correlation;
     }
 
-    struct Max {
-        cv::Point2i loc;
-        double response;
-    };
-
 #ifdef BIG_BATCH
     std::vector<Max> max = std::vector<Max>(num_of_scales);
 #else
