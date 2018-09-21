@@ -69,15 +69,15 @@ void cuFFT::set_window(const MatDynMem &window)
     m_window = window;
 }
 
-void cuFFT::forward(const MatDynMem &real_input, ComplexMat &complex_result)
+void cuFFT::forward(const MatScales &real_input, ComplexMat &complex_result)
 {
     Fft::forward(real_input, complex_result);
-    auto in = static_cast<cufftReal *>(const_cast<MatDynMem&>(real_input).deviceMem());
+    auto in = static_cast<cufftReal *>(const_cast<MatScales&>(real_input).deviceMem());
 
     cudaErrorCheck(cufftExecR2C(plan_f, in, complex_result.get_p_data()));
 }
 
-void cuFFT::forward_window(MatDynMem &feat, ComplexMat &complex_result, MatDynMem &temp)
+void cuFFT::forward_window(MatScaleFeats &feat, ComplexMat &complex_result, MatScaleFeats &temp)
 {
     Fft::forward_window(feat, complex_result, temp);
 
@@ -85,9 +85,11 @@ void cuFFT::forward_window(MatDynMem &feat, ComplexMat &complex_result, MatDynMe
     cufftReal *temp_data = temp.deviceMem();
 
     for (uint i = 0; i < n_channels; ++i) {
-        cv::Mat feat_plane = feat.plane(i);
-        cv::Mat temp_plane = temp.plane(i);
-        temp_plane = feat_plane.mul(m_window);
+        for (uint j = 0; j < uint(feat.size[1]); ++j) {
+            cv::Mat feat_plane = feat.plane(i, j);
+            cv::Mat temp_plane = temp.plane(i, j);
+            temp_plane = feat_plane.mul(m_window);
+        }
     }
     cudaErrorCheck(cufftExecR2C(plan_fw, temp_data, complex_result.get_p_data()));
 }
