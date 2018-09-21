@@ -99,7 +99,7 @@ class MatDynMem : public DynMem, public cv::Mat {
     cv::Mat plane(uint i) {
         assert(dims == 3);
         assert(int(i) < size[0]);
-        return cv::Mat(dims - 1, size + 1, cv::Mat::type(), ptr(i));
+        return cv::Mat(size[1], size[2], cv::Mat::type(), ptr(i));
     }
   private:
     static int volume(int ndims, const int *sizes)
