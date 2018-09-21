@@ -38,6 +38,18 @@ void Fft::forward(const MatScales &real_input, ComplexMat &complex_result)
     (void) complex_result;
 }
 
+void Fft::forward_window(MatFeats &patch_feats, ComplexMat &complex_result, MatFeats &tmp)
+{
+    assert(patch_feats.dims == 3);
+    assert(patch_feats.size[0] == int(m_num_of_feats));
+    assert(patch_feats.size[1] == int(m_height));
+    assert(patch_feats.size[2] == int(m_width));
+
+    (void)tmp;
+    (void)complex_result;
+    (void)patch_feats;
+}
+
 void Fft::forward_window(MatScaleFeats &patch_feats, ComplexMat &complex_result, MatScaleFeats &tmp)
 {
         assert(patch_feats.dims == 4);
