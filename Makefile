@@ -67,23 +67,24 @@ vot2016.zip:
 # compiles all variants in the same ways as this makefile, but faster.
 # The down side is that the build needs about 10 GB of memory.
 
-define nl
-
-
-endef
 
 # Define echo depending on whether make supports the $(file) function.
 $(file >.test.file)
 ifneq ($(wildcard .test.file),)
   echo = $(file $(1),$(2))
 else
+  define nl
+
+
+  endef
   echo = echo $(1) '$(subst $(nl),\n,$(subst \,\\,$(2)))';
 endif
 
 # Ninja generator - to have faster parallel builds and tests
 .PHONY: build.ninja
 
-build.ninja: Makefile
+build.ninja:: $(MAKEFILE_LIST)
+	@echo "Generating $@"
 	@$(call echo,>$@,$(ninja-rule))
 	@$(foreach build,$(BUILDS),\
 		$(call echo,>>$@,$(call ninja-build,$(build),$(CMAKE_OTPS_$(build)))))
@@ -98,14 +99,14 @@ ninja-test = build-$(1)/kcf_vot-$(2)-$(3).log
 
 define ninja-rule
 rule REGENERATE
-  command = make $$out BUILDS="$(BUILDS)" TESTSEQ="$(TESTSEQ)" TESTFLAGS="$(TESTFLAGS)"
+  command = MAKEFLAGS='$(MAKEFLAGS)' $(MAKE) $$out
+  description = Regenerating $$out
   generator = 1
 rule CMAKE
   command = cd $$subdir && cmake $(CMAKE_OPTS) $$opts ..
 rule NINJA
   # Absolute path in -C allows Emacs to properly jump to error message locations
   command = ninja -C $(CURDIR)/$$subdir
-  description = ninja $$out
   restat = 1
 rule TEST_SEQ
   # Errors are ignored - they will be reported by PRINT_RESULTS
@@ -123,7 +124,7 @@ rule CLEAN
   description = Cleaning all built files...
   command = rm -rf $(BUILDS:%=build-%)
 build clean: CLEAN
-build build.ninja: REGENERATE Makefile
+build build.ninja: REGENERATE $(MAKEFILE_LIST)
 endef
 
 GIT_LS_FILES := $(shell git ls-files)
